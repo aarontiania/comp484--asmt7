@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2020 by aarontiania (http://jsbin.com/yicuwun/33/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+
+  <title>Add an Employee</title>
+
+  <meta name="description" content="Form to add an employee to the database">
+  <meta name="keywords" content="Employee, Database, Form">
+  <meta name="author" content="Aaron-James Tiania">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <style id="jsbin-css">
+    @media only screen and (max-width: 479px) {
+      body {
+        font-size: 3vw;
+
+      }
+    }
+
+    body {
+      font-family: "Lato";
+      width: 100%;
+      text-align: left;
+    }
+
+    legend {
+      color: red;
+      font-size: 22px;
+    }
+
+    fieldset {
+      width: 200px;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .centerContainer {
+      width: 233px;
+    }
+
+    .submit {
+      font-size: 16px;
+      font-weight: bold;
+      border: 1px solid lightgray;
+      background-color: inherit !important;
+      border-radius: 9px !important;
+      text-align: center;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="centerContainer">
+    <form action="" method="get" id="theForm">
+      <fieldset>
+        <legend>Add an Employee</legend>
+        <div><label for="firstname">First Name</label></div>
+        <input type="text" id="firstname">
+
+        <div><label for="lastname">Last Name</label></div>
+        <input type="text" id="lastname">
+
+        <div><label for="department">Department</label></div>
+
+        <select name="department" id="department">
+          <option value="Engineering">Engineering</option>
+          <option value="Computer Science">Computer Science</option>
+          <option value="English">English</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Business">Business</option>
+          <option value="Finance">Finance</option>
+          <option value="Film">Film</option>
+        </select>
+
+        <br><br>
+        <div><button class="submit" id="submitbutton">Submit →</button></div>
+        <br>
+      </fieldset>
+    </form>
+
+    <div id="res">
+      <h2 id="empAddText"></h2>
+
+      <p id="empname"></p>
+      <p id="emplast"></p>
+      <p id="empdep"></p>
+      <p id="empid"></p>
+      <p id="emphire"></p>
+      <p id="emptotal"></p>
+    </div>
+
+
+  </div>
+
+  <script id="jsbin-javascript">
+    var employees = [];
+    var res;
+    var browser;
+
+    function setDay(input) {
+      var dates = ["MON", "TUES", "WED", "THURS", "FRI", "SAT", "SUN"];
+      var num = input.charAt(0);
+
+      return dates[num] + " " + input.substring(2);
+    }
+
+    function setID(input) {
+      var pointer = input.indexOf(",");
+      res = res.substring(pointer + 1);
+      return input.substring(0, pointer);
+    }
+
+    function setEmpTotal(input) {
+      var pointer = input.indexOf(",");
+      res = res.substring(pointer + 1);
+      return input.substring(0, pointer);
+    }
+
+    function generateID() {
+      return parseInt((Math.random() * 1000000000).toString().substr(0, 8));
+    }
+
+    function exists(input) {
+      var seen = false;
+      employees.forEach((emp) => {
+        if (emp == input) {
+          seen = true;
+        }
+      });
+
+      return seen;
+    }
+
+    function addEmployee() {
+      'use strict';
+
+      var id = generateID();
+      var firstname = document.getElementById("firstname").value;
+      var lastname = document.getElementById("lastname").value;
+      var department = document.getElementById("department").value;
+
+      if (exists(firstname + " " + lastname)) {
+        alert("Employee already exists!");
+      } else {
+        if (firstname == "" || lastname == "") {
+          alert("Please enter values for first and last name!");
+        } else {
+          var empid;
+          var hiredate;
+          var totalemp;
+
+          var xmlhttp = new XMLHttpRequest();
+
+          //console.log("http://localhost/addEmployee.php?firstname=" + firstname + "&lastname=" + lastname + "&department=" + department);
+
+          xmlhttp.open("GET", "http://localhost/addEmployee.php?id=" + id + "&firstname=" + firstname + "&lastname=" + lastname + "&department=" + department, true);
+          xmlhttp.send();
+
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              res = this.responseText;
+              console.log(res);
+              empid = setID(res);
+              totalemp = setEmpTotal(res);
+              hiredate = setDay(res);
+
+              employees.push(firstname + " " + lastname);
+
+              $('#empAddText').text('Employee added');
+              $('#empname').text('Name: ' + lastname + ', ' + firstname);
+              $('#empdep').text('Department: ' + department);
+              $('#empid').text('Employee ID: ' + empid);
+              $('#emphire').text('Hire date: ' + hiredate);
+              $('#emptotal').text('Total Employees: ' + totalemp);
+
+              $('#firstname').val("");
+              $('#lastname').val("");
+              findBrowser();
+            }
+          };
+          return false;
+        }
+      }
+    }
+
+    function findBrowser() {
+      if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
+        $('#res').append(
+          "<img class=\"icon\" src=\"https://cdn1.iconfinder.com/data/icons/logotypes/32/opera-512.png\"> <text>Opera</text>"
+        );
+      }
+      else if (navigator.userAgent.indexOf("Chrome") != -1) {
+        $('#res').append(
+          "<img class=\"icon\" src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/1200px-Google_Chrome_icon_%28September_2014%29.svg.png\"><text>Chrome</text>"
+        );
+      }
+      else if (navigator.userAgent.indexOf("Safari") != -1) {
+        $('#res').append(
+          "<img class=\"icon\" src=\"https://i.pinimg.com/originals/98/14/6e/98146ec63f05240c321a82f8b35a31c0.png\"><text>Safari</text>"
+        );
+      }
+      else if (navigator.userAgent.indexOf("Firefox") != -1) {
+        $('#res').append(
+          "<img class=\"icon\" src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Firefox_logo%2C_2019.svg/1200px-Firefox_logo%2C_2019.svg.png\"><text>Firefox</text>"
+        );
+      }
+      else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.documentMode == true)) //IF IE > 10
+      {
+        $('#res').append(
+          "<img class=\"icon\" src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Internet_Explorer_9_icon.svg/1024px-Internet_Explorer_9_icon.svg.png\"><text>Internet Explorer</text>"
+        );
+      }
+    }
+
+    function init() {
+      'use strict';
+      document.getElementById('submitbutton').onclick = addEmployee;
+    }
+    window.onload = init;
+  </script>
+
+</body>
+
+</html>
